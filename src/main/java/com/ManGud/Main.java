@@ -125,7 +125,7 @@ public class Main
                 boolean autoIncrement = columnRs.getBoolean("IS_AUTOINCREMENT");
                 String description = columnRs.getString("REMARKS");
 
-                String ddl = getDDLForOracle(columnName, dataType, length, scale, notNull, autoIncrement);
+                String ddl = getDDLForOracle(columnName, dataType, length, scale, notNull);
                 writer.write(String.format("%s,%s,%s,%d,%d,%s,%s,%s,%n",
                         tableName, columnName, dataType, length, scale,
                         notNull ? "Yes" : "No",
@@ -201,7 +201,7 @@ public class Main
         }
     }
 
-    private static String getDDLForOracle(String columnName, String dataType, int length, int scale, boolean notNull, boolean autoIncrement) {
+    private static String getDDLForOracle(String columnName, String dataType, int length, int scale, boolean notNull) {
         StringBuilder sb = new StringBuilder();
 
         sb.append('\"').append(columnName).append('\"').append(' ');
