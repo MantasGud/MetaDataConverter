@@ -1,4 +1,4 @@
-package com.ManGud;
+package com.mangud;
 
 import static org.junit.Assert.assertTrue;
 
