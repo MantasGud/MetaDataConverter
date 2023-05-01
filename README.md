@@ -45,3 +45,4 @@ To build the project, use your favorite Java build tool, such as Maven or Gradle
 - AS400
 ### Compare any type database schema to any type database schema.
 ### Select DDL file, extract tables, delete tables from schema and insert from DDL.
+### Extracted table as an object.
