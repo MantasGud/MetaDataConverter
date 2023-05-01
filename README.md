@@ -35,10 +35,10 @@ To build the project, use your favorite Java build tool, such as Maven or Gradle
 - Oracle
 - MySQL
 - SQL
-- DB2**(Done)**
-- AS400**(Done)**
+- DB2 **Done**
+- AS400 **Done**
 ### Create Metadata DDL to:
-- Oracle**(Done)**
+- Oracle **Done**
 - MySQL
 - SQL
 - DB2
