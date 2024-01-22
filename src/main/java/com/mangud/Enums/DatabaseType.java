@@ -11,7 +11,8 @@ public enum DatabaseType {
 
     @Getter
     private int dbType;
-    private String typeName;
+    @Getter
+    private final String typeName;
 
     DatabaseType(int dbType, String typeName) {
         this.dbType = dbType;

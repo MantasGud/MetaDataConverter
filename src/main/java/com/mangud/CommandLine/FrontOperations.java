@@ -20,11 +20,10 @@ public class FrontOperations {
             BackOperations.processScannerFirstLayer(scanner, state, processor);
         }
 
-        if (!state.isStart()) {
-            System.out.println("Exiting...");
-            saveState(state);
-            System.exit(0);
-        }
+        System.out.println("Exiting...");
+        saveState(state);
+        System.exit(0);
+
     }
     private static void displayMainMenu() {
         System.out.println("\nPlease choose an option:");
