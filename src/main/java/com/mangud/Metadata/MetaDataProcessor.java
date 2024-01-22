@@ -63,7 +63,7 @@ public class MetaDataProcessor {
     private void writeMetadataToFiles(DatabaseMetaData metaData, FileWriter writer, FileWriter ddlWriter, MetadataToolState state) throws SQLException, IOException {
         writer.write("Table Name, Column Name, Data Type, Length, Scale, Not Null, Auto Increment\n");
 
-        DatabaseHandler databaseHandler = getDatabaseHandler(state.getDbType(), 1);
+        DatabaseHandler databaseHandler = getDatabaseHandler(state.getDbType().getDbType(), 1);
         switch (state.getTableReadType()) {
             case 0:
                 scanWholeSchema(metaData, writer, ddlWriter, databaseHandler, state);
@@ -95,7 +95,9 @@ public class MetaDataProcessor {
     private void tryConnectionToDatabase(MetadataToolState state)  throws UnknownHostException {
         try (Connection conn = DriverManager.getConnection(state.getFullUrlWithLibraries(), state.getUsername(), state.getPassword())) {
             DatabaseMetaData metaData = conn.getMetaData();
-            System.out.println("Connection was successful.");
+            if (metaData != null) {
+                System.out.println("Connection was successful.");
+            }
         } catch (SQLException e) {
             System.err.println("Failed to connect to database");
             InetAddress localAddress = InetAddress.getLocalHost();
@@ -159,7 +161,7 @@ public class MetaDataProcessor {
         String compareFile = "SchemaCompareDLLAndOracle.txt";
 
         try (Connection conn1 = DriverManager.getConnection(dbUrl2, dbUser, dbPassword);
-             Connection conn2 = DriverManager.getConnection(dbUrl1, dbUser, dbPassword);){
+             Connection conn2 = DriverManager.getConnection(dbUrl1, dbUser, dbPassword)){
 
             // Compare the schema information and generate required SQL statements
             List<String> diffSql = compareSchemasTSTtoDev(conn1, conn2, dbUser);

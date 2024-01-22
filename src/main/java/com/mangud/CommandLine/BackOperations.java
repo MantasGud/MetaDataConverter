@@ -1,5 +1,6 @@
 package com.mangud.CommandLine;
 
+import com.mangud.Enums.DatabaseType;
 import com.mangud.Metadata.MetaDataProcessor;
 import com.mangud.States.MetadataToolState;
 
@@ -12,7 +13,8 @@ public class BackOperations {
             switch (choice) {
                 case 1:
                     FrontOperations.printDatabaseTypes();
-                    state.setDbType(Integer.parseInt(scanner.nextLine()));
+                    int dbTypeInput = Integer.parseInt(scanner.nextLine());
+                    state.setDbType(DatabaseType.setDbTypeFromInt(dbTypeInput));
                     break;
                 case 2:
                     setDatabaseConnectionDetails(scanner, state);
@@ -134,22 +136,27 @@ public class BackOperations {
 
             switch (choice) {
                 case 1:
+                    FrontOperations.printDatabaseTypes();
+                    int dbTypeInput = Integer.parseInt(scanner.nextLine());
+                    state.setDbDDLType(DatabaseType.setDbTypeFromInt(dbTypeInput));
+                    break;
+                case 2:
                     System.out.println("Write schema name in created DDL");
                     state.setToSchema(scanner.nextLine());
                     break;
-                case 2:
+                case 3:
                     System.out.println("Write added column name in created DDL");
                     state.setAddedColumnName(scanner.nextLine());
                     break;
-                case 3:
+                case 4:
                     System.out.println("Write prefix of table in created DDL");
                     state.setTableStart(scanner.nextLine());
                     break;
-                case 4:
+                case 5:
                     System.out.println("Write tablespace in created DDL");
                     state.setTableSpace(scanner.nextLine());
                     break;
-                case 5:
+                case 6:
 
                     break;
                 default:

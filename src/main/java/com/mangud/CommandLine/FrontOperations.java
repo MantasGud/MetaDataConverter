@@ -20,11 +20,10 @@ public class FrontOperations {
             BackOperations.processScannerFirstLayer(scanner, state, processor);
         }
 
-        if (!state.isStart()) {
-            System.out.println("Exiting...");
-            saveState(state);
-            System.exit(0);
-        }
+        System.out.println("Exiting...");
+        saveState(state);
+        System.exit(0);
+
     }
     private static void displayMainMenu() {
         System.out.println("\nPlease choose an option:");
@@ -91,7 +90,7 @@ public class FrontOperations {
 
     public static void ddlLayer(Scanner scanner, MetadataToolState state) {
         int choice = 0;
-        while (choice != 5) {
+        while (choice != 6) {
             displayDDLSettingsMenu();
             choice = Integer.parseInt(scanner.nextLine());
             BackOperations.processScannerDDLOptionLayer(choice, scanner, state);
@@ -101,10 +100,11 @@ public class FrontOperations {
 
     private static void displayDDLSettingsMenu() {
         System.out.println("DDL settings");
-        System.out.println("1. Set DDL schema name");
-        System.out.println("2. Set added column name");
-        System.out.println("3. Set table prefix");
-        System.out.println("4. Set tablespace name");
-        System.out.println("5. Return");
+        System.out.println("1. Set new DDL database type");
+        System.out.println("2. Set DDL schema name");
+        System.out.println("3. Set added column name");
+        System.out.println("4. Set table prefix");
+        System.out.println("5. Set tablespace name");
+        System.out.println("6. Return");
     }
 }
