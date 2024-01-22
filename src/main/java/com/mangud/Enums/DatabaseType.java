@@ -2,6 +2,7 @@ package com.mangud.Enums;
 
 import lombok.Getter;
 
+@Getter
 public enum DatabaseType {
     ORACLE(1, "Oracle"),
     MYSQL(2, "MySQL"),
@@ -9,9 +10,7 @@ public enum DatabaseType {
     DB2(4, "DB2"),
     AS400(5, "AS400");
 
-    @Getter
-    private int dbType;
-    @Getter
+    private final int dbType;
     private final String typeName;
 
     DatabaseType(int dbType, String typeName) {
