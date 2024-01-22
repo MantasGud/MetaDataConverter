@@ -1,5 +1,6 @@
 package com.mangud.States;
 
+import com.mangud.Enums.DatabaseType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,8 @@ import java.util.List;
 public class MetadataToolState implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private int dbType =1; //1- Oracle 2-MySQL 3-SQL 4-DB2 5-AS400
+    private DatabaseType dbType = DatabaseType.ORACLE; //1- Oracle 2-MySQL 3-SQL 4-DB2 5-AS400
+    private DatabaseType dbDDLType = DatabaseType.ORACLE; //1- Oracle 2-MySQL 3-SQL 4-DB2 5-AS400
     private String url;
     private String fullUrlWithLibraries;
     private String username;
@@ -38,6 +40,7 @@ public class MetadataToolState implements Serializable {
     public String toString() {
         return "MetadataToolState{" +
                 "dbType=" + dbType +
+                ", dbDDLType='" + dbDDLType + '\'' +
                 ", url='" + url + '\'' +
                 ", fullUrlWithLibraries='" + fullUrlWithLibraries + '\'' +
                 ", username='" + username + '\'' +
@@ -55,7 +58,7 @@ public class MetadataToolState implements Serializable {
     }
 
     public void setfullUrlWithLibraries() {
-        switch (dbType) {
+        switch (dbType.getDbType()) {
             case 1:
                 this.fullUrlWithLibraries = null;
                 break;
@@ -125,8 +128,14 @@ public class MetadataToolState implements Serializable {
         }
 
         // Validate database type
-        if (dbType < 1 || dbType > 5) {
+        if (dbType.getDbType() < 1 || dbType.getDbType() > 5) {
             System.err.println("Invalid database type.");
+            return false;
+        }
+
+        // Validate DLL database type
+        if (dbDDLType.getDbType() < 1 || dbDDLType.getDbType() > 5) {
+            System.err.println("Invalid DDL database type.");
             return false;
         }
 

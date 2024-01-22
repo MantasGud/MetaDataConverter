@@ -63,7 +63,7 @@ public class MetaDataProcessor {
     private void writeMetadataToFiles(DatabaseMetaData metaData, FileWriter writer, FileWriter ddlWriter, MetadataToolState state) throws SQLException, IOException {
         writer.write("Table Name, Column Name, Data Type, Length, Scale, Not Null, Auto Increment\n");
 
-        DatabaseHandler databaseHandler = getDatabaseHandler(state.getDbType(), 1);
+        DatabaseHandler databaseHandler = getDatabaseHandler(state.getDbType().getDbType(), 1);
         switch (state.getTableReadType()) {
             case 0:
                 scanWholeSchema(metaData, writer, ddlWriter, databaseHandler, state);
