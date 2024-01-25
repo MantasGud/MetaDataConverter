@@ -1,8 +1,10 @@
 package com.mangud.CommandLine;
 
 import com.mangud.Enums.DatabaseType;
-import com.mangud.Metadata.MetaDataProcessor;
+import com.mangud.Processors.MainProcessor;
+import com.mangud.Processors.MetaDataProcessor;
 import com.mangud.States.MetadataToolState;
+import com.mangud.Utils.DatabaseUtils;
 
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -49,13 +51,13 @@ public class BackOperations {
         state.setSchema(scanner.nextLine());
     }
 
-    public static void processScannerFirstLayer(Scanner scanner, MetadataToolState state, MetaDataProcessor processor) throws UnknownHostException {
+    public static void processScannerFirstLayer(Scanner scanner, MetadataToolState state, MainProcessor processor) {
 
         try {
 
             switch (Integer.parseInt(scanner.nextLine())) {
                 case 1:
-                    processor.processMetaData(state);
+                    processor.convertMetadata(state);
                     break;
                 case 2:
                     processor.testConnection(state);
@@ -67,13 +69,13 @@ public class BackOperations {
                     FrontOperations.optionLayer(scanner, state);
                     break;
                 case 5:
-                    BackOperations.processScannerInsertDLL(scanner, processor);
+                    BackOperations.processScannerInsertDLL(scanner);
                     break;
                 case 6:
                     state.setStart(false);
                     break;
                 case 7:
-                    processor.compareTstToDev(state);
+                    processor.compareTwoDatabaseSchemas(state);
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
@@ -84,7 +86,7 @@ public class BackOperations {
 
     }
 
-    private static void processScannerInsertDLL(Scanner scanner, MetaDataProcessor processor) {
+    private static void processScannerInsertDLL(Scanner scanner) {
         System.out.println("Enter the ORACLE URL");
         String ip = (scanner.nextLine());
         System.out.println("Enter the ORACLE PORT");
@@ -96,7 +98,7 @@ public class BackOperations {
         String dbPassword = (scanner.nextLine());
         System.out.println("Enter the file name:");
         String DDLFileName = (scanner.nextLine());
-        processor.addDDLToDatabase(databaseUrl, dbUser, dbPassword, DDLFileName);
+        DatabaseUtils.addDDLToDatabase(databaseUrl, dbUser, dbPassword, DDLFileName);
     }
 
     public static void processScannerTableOptionLayer(int choice, Scanner scanner, MetadataToolState state) {

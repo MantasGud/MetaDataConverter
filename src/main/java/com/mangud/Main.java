@@ -10,7 +10,7 @@ public class Main
             com.mangud.States.MetadataToolState state = com.mangud.States.MetadataToolState.loadState();
             com.mangud.Utils.DriversUtils.configureDriversClasspaths();
             com.mangud.CommandLine.FrontOperations.runTool(state);
-        } catch (ClassNotFoundException | UnknownHostException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
             System.exit(1);
         }

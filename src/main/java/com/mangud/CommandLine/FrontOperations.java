@@ -1,6 +1,7 @@
 package com.mangud.CommandLine;
 
-import com.mangud.Metadata.MetaDataProcessor;
+import com.mangud.Processors.MainProcessor;
+import com.mangud.Processors.MetaDataProcessor;
 import com.mangud.States.MetadataToolState;
 
 import java.net.UnknownHostException;
@@ -9,15 +10,15 @@ import java.util.Scanner;
 import static com.mangud.States.MetadataToolState.saveState;
 
 public class FrontOperations {
-    public static void runTool(MetadataToolState state) throws UnknownHostException {
+    public static void runTool(MetadataToolState state){
         Scanner scanner = new Scanner(System.in);
-        MetaDataProcessor processor = new MetaDataProcessor();
+        MainProcessor mainProcessor = new MainProcessor();
         state.setStart(true);
         System.out.println("Welcome to the database metadata tool.");
 
         while (state.isStart()) {
             displayMainMenu();
-            BackOperations.processScannerFirstLayer(scanner, state, processor);
+            BackOperations.processScannerFirstLayer(scanner, state, mainProcessor);
         }
 
         System.out.println("Exiting...");
@@ -27,7 +28,7 @@ public class FrontOperations {
     }
     private static void displayMainMenu() {
         System.out.println("\nPlease choose an option:");
-        System.out.println("1. Start process metadata to DDL/.csv file");
+        System.out.println("1. Extract metadata to other database DDL and csv file");
         System.out.println("2. Test connection to server");
         System.out.println("3. Print all states");
         System.out.println("4. Set settings");
@@ -41,6 +42,7 @@ public class FrontOperations {
 
             displaySettingsMenu();
             choice = Integer.parseInt(scanner.nextLine());
+            clearConsole();
             BackOperations.processScannerOptionLayer(choice, scanner, state);
         }
     }
@@ -71,6 +73,7 @@ public class FrontOperations {
         while (choice != 5) {
             displayTableSettingsMenu();
             choice = Integer.parseInt(scanner.nextLine());
+            clearConsole();
             BackOperations.processScannerTableOptionLayer(choice, scanner, state);
 
         }
@@ -93,6 +96,7 @@ public class FrontOperations {
         while (choice != 6) {
             displayDDLSettingsMenu();
             choice = Integer.parseInt(scanner.nextLine());
+            clearConsole();
             BackOperations.processScannerDDLOptionLayer(choice, scanner, state);
 
         }
@@ -100,11 +104,28 @@ public class FrontOperations {
 
     private static void displayDDLSettingsMenu() {
         System.out.println("DDL settings");
-        System.out.println("1. Set new DDL database type");
+        System.out.println("1. Set new DDL database type(not implemented. Oracle only now)");
         System.out.println("2. Set DDL schema name");
         System.out.println("3. Set added column name");
         System.out.println("4. Set table prefix");
         System.out.println("5. Set tablespace name");
         System.out.println("6. Return");
+    }
+
+    public static void clearConsole() {
+        //TODO : Not working
+        try {
+            // For Windows
+            if (System.getProperty("os.name").contains("Windows")) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            }
+            // For Unix-like systems
+            else {
+                System.out.print("\033[H\033[2J");
+                System.out.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

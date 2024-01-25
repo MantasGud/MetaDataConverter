@@ -1,6 +1,6 @@
 package com.mangud.Handlers;
 
-import com.mangud.Metadata.TableMetaData;
+import com.mangud.Metadata.ColumnMetaData;
 import com.mangud.States.MetadataToolState;
 
 import java.io.FileWriter;
@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 public class AS400ToOracleHandler implements DatabaseHandler{
 
-    @Override
     public void processTable(DatabaseMetaData metaData, String tableName, FileWriter writer, FileWriter ddlWriter, MetadataToolState state) throws SQLException, IOException {
         writeTableMetadata(metaData, tableName, writer, ddlWriter, state);
         writeIndexMetadata(metaData, tableName, writer, ddlWriter, state);
@@ -24,7 +23,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
 
         try (ResultSet columnRs = metaData.getColumns(null, state.getSchema(), tableName, null)) {
             while (columnRs.next()) {
-                TableMetaData tableMetadata = new TableMetaData(
+                ColumnMetaData columnMetadata = new ColumnMetaData(
                         columnRs.getString("COLUMN_NAME"),
                         columnRs.getString("TYPE_NAME"),
                         columnRs.getInt("COLUMN_SIZE"),
@@ -34,14 +33,14 @@ public class AS400ToOracleHandler implements DatabaseHandler{
                         columnRs.getString("REMARKS")
                 );
 
-                String ddl = getDDLForOracle(tableMetadata.getColumnName(), tableMetadata.getDataType(),
-                        tableMetadata.getLength(), tableMetadata.getScale(), tableMetadata.isNotNull());
+                String ddl = getDDLForOracle(columnMetadata.getColumnName(), columnMetadata.getDataType(),
+                        columnMetadata.getLength(), columnMetadata.getScale(), columnMetadata.isNotNull());
                 writer.write(String.format("%s,%s,%s,%d,%d,%s,%s,%s,%n",
-                        tableName, tableMetadata.getColumnName(), tableMetadata.getDataType(), tableMetadata.getLength(),
-                        tableMetadata.getScale(),
-                        tableMetadata.isNotNull() ? "Yes" : "No",
-                        tableMetadata.isAutoIncrement() ? "Yes" : "No",
-                        tableMetadata.getDescription()));
+                        tableName, columnMetadata.getColumnName(), columnMetadata.getDataType(), columnMetadata.getLength(),
+                        columnMetadata.getScale(),
+                        columnMetadata.isNotNull() ? "Yes" : "No",
+                        columnMetadata.isAutoIncrement() ? "Yes" : "No",
+                        columnMetadata.getDescription()));
                 ddlWriter.write(String.format("%s,%n", ddl));
             }
         }
@@ -214,5 +213,10 @@ public class AS400ToOracleHandler implements DatabaseHandler{
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public void extractTableMetadata(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
+
     }
 }
