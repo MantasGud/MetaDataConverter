@@ -10,6 +10,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mangud.Utils.StringUtils.isNullOrEmpty;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -122,8 +124,34 @@ public class MetadataToolState implements Serializable {
     public boolean isValidInfo() {
         this.setfullUrlWithLibraries();
         // Check if the required fields are not null
-        if (toSchema == null || fullUrlWithLibraries == null || url == null || username == null || password == null || schema == null) {
-            System.err.println("One or more required fields are null.");
+
+        if (isNullOrEmpty(schema)) {
+            System.err.println("Invalid password.");
+            return false;
+        }
+
+        if (isNullOrEmpty(password)) {
+            System.err.println("Invalid password.");
+            return false;
+        }
+
+        if (isNullOrEmpty(username)) {
+            System.err.println("Invalid username.");
+            return false;
+        }
+
+        if (isNullOrEmpty(url)) {
+            System.err.println("Invalid url.");
+            return false;
+        }
+
+        if (fullUrlWithLibraries == null) {
+            System.err.println("There was an error generating full url. Try again by writing url and port.");
+            return false;
+        }
+
+        if (isNullOrEmpty(toSchema)) {
+            System.err.println("Invalid schema name in generatable DDL.");
             return false;
         }
 
@@ -146,14 +174,14 @@ public class MetadataToolState implements Serializable {
         }
 
         // Validate outputFile
-        if (outputFile == null || outputFile.isEmpty()) {
+        if (isNullOrEmpty(outputFile)) {
             System.err.println("Output file name cannot be null or empty.");
             return false;
         }
 
         // Validate tableListFile and tableNames if tableReadType is 1
         if (tableReadType == 1) {
-            if (tableListFile == null || tableListFile.isEmpty()) {
+            if (isNullOrEmpty(tableListFile)) {
                 System.err.println("Table list file name cannot be null or empty when tableReadType is 1.");
                 return false;
             }
