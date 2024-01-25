@@ -45,11 +45,11 @@ public class AS400ToOracleHandler implements DatabaseHandler{
             }
         }
 
-        if (!state.getAddedColumnName().equals("")) { ddlWriter.write(String.format("%s%n", "\"" + state.getAddedColumnName() + "\" NUMBER(22,0)")); }
+        if (!state.getAddedColumnName().isEmpty()) { ddlWriter.write(String.format("%s%n", "\"" + state.getAddedColumnName() + "\" NUMBER(22,0)")); }
 
         ddlWriter.write(String.format("%s%n", ")"));
 
-        if (!state.getAddedColumnName().equals("")) {
+        if (!state.getAddedColumnName().isEmpty()) {
             ddlWriter.write(String.format("%s%n", " partition by range (" + state.getAddedColumnName() + ") interval (1)"));
             ddlWriter.write(String.format("%s%n", "(partition p000000001  values less than (2))"));
             ddlWriter.write(String.format("%s%n%n", "tablespace " + state.getTableSpace() + ";"));
@@ -103,7 +103,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
             for (Map.Entry<String, List<String>> entry : indexColumnsMap.entrySet()) {
                 String indexName = entry.getKey();
                 List<String> columnList = entry.getValue();
-                if (!state.getAddedColumnName().equals("")) { columnList.add(state.getAddedColumnName()); }
+                if (!state.getAddedColumnName().isEmpty()) { columnList.add(state.getAddedColumnName()); }
 
                 String sortedColumns = columnList.stream().sorted().collect(Collectors.joining(","));
                 if (uniqueColumnSets.contains(sortedColumns)) {
@@ -124,7 +124,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
                 ddlWriter.write(indexStr);
             }
 
-            if (!state.getAddedColumnName().equals("")) {
+            if (!state.getAddedColumnName().isEmpty()) {
                 String newIndexStr = String.format("CREATE INDEX %s.%s_IDX_%s ON %s.%s (\"%s\");%n",
                         state.getToSchema(), state.getAddedColumnName(), tableName, state.getToSchema(), tableFullName, state.getAddedColumnName());
                 writer.write(newIndexStr);
@@ -204,7 +204,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
                 break;
             // Add more data types as needed
             default:
-                sb.append("NOT FOUND/DEFAULT " + dataType);
+                sb.append("NOT FOUND/DEFAULT ").append(dataType);
                 break;
         }
 

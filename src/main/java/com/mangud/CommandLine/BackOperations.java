@@ -2,11 +2,9 @@ package com.mangud.CommandLine;
 
 import com.mangud.Enums.DatabaseType;
 import com.mangud.Processors.MainProcessor;
-import com.mangud.Processors.MetaDataProcessor;
 import com.mangud.States.MetadataToolState;
 import com.mangud.Utils.DatabaseUtils;
 
-import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class BackOperations {

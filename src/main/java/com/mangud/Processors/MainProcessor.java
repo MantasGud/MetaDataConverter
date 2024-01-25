@@ -1,16 +1,13 @@
 package com.mangud.Processors;
 
 import com.mangud.States.MetadataToolState;
-import com.mangud.Utils.IOUtils;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
 
 public class MainProcessor {
 

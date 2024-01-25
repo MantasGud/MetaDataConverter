@@ -1,10 +1,8 @@
 package com.mangud.CommandLine;
 
 import com.mangud.Processors.MainProcessor;
-import com.mangud.Processors.MetaDataProcessor;
 import com.mangud.States.MetadataToolState;
 
-import java.net.UnknownHostException;
 import java.util.Scanner;
 
 import static com.mangud.States.MetadataToolState.saveState;
