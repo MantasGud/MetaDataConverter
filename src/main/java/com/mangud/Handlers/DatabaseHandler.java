@@ -8,5 +8,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 public interface DatabaseHandler {
+    void extractTableMetadata(DatabaseMetaData metaData, String tableName, MetadataToolState state);
     void processTable(DatabaseMetaData metaData, String tableName, FileWriter writer, FileWriter ddlWriter, MetadataToolState state) throws SQLException, IOException;
 }

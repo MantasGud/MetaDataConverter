@@ -1,6 +1,6 @@
 package com.mangud.Handlers;
 
-import com.mangud.Metadata.TableMetaData;
+import com.mangud.Metadata.ColumnMetaData;
 import com.mangud.States.MetadataToolState;
 
 import java.io.FileWriter;
@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 public class AS400ToOracleHandler implements DatabaseHandler{
 
-    @Override
     public void processTable(DatabaseMetaData metaData, String tableName, FileWriter writer, FileWriter ddlWriter, MetadataToolState state) throws SQLException, IOException {
         writeTableMetadata(metaData, tableName, writer, ddlWriter, state);
         writeIndexMetadata(metaData, tableName, writer, ddlWriter, state);
@@ -24,7 +23,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
 
         try (ResultSet columnRs = metaData.getColumns(null, state.getSchema(), tableName, null)) {
             while (columnRs.next()) {
-                TableMetaData tableMetadata = new TableMetaData(
+                ColumnMetaData columnMetadata = new ColumnMetaData(
                         columnRs.getString("COLUMN_NAME"),
                         columnRs.getString("TYPE_NAME"),
                         columnRs.getInt("COLUMN_SIZE"),
@@ -34,23 +33,23 @@ public class AS400ToOracleHandler implements DatabaseHandler{
                         columnRs.getString("REMARKS")
                 );
 
-                String ddl = getDDLForOracle(tableMetadata.getColumnName(), tableMetadata.getDataType(),
-                        tableMetadata.getLength(), tableMetadata.getScale(), tableMetadata.isNotNull());
+                String ddl = getDDLForOracle(columnMetadata.getColumnName(), columnMetadata.getDataType(),
+                        columnMetadata.getLength(), columnMetadata.getScale(), columnMetadata.isNotNull());
                 writer.write(String.format("%s,%s,%s,%d,%d,%s,%s,%s,%n",
-                        tableName, tableMetadata.getColumnName(), tableMetadata.getDataType(), tableMetadata.getLength(),
-                        tableMetadata.getScale(),
-                        tableMetadata.isNotNull() ? "Yes" : "No",
-                        tableMetadata.isAutoIncrement() ? "Yes" : "No",
-                        tableMetadata.getDescription()));
+                        tableName, columnMetadata.getColumnName(), columnMetadata.getDataType(), columnMetadata.getLength(),
+                        columnMetadata.getScale(),
+                        columnMetadata.isNotNull() ? "Yes" : "No",
+                        columnMetadata.isAutoIncrement() ? "Yes" : "No",
+                        columnMetadata.getDescription()));
                 ddlWriter.write(String.format("%s,%n", ddl));
             }
         }
 
-        if (!state.getAddedColumnName().equals("")) { ddlWriter.write(String.format("%s%n", "\"" + state.getAddedColumnName() + "\" NUMBER(22,0)")); }
+        if (!state.getAddedColumnName().isEmpty()) { ddlWriter.write(String.format("%s%n", "\"" + state.getAddedColumnName() + "\" NUMBER(22,0)")); }
 
         ddlWriter.write(String.format("%s%n", ")"));
 
-        if (!state.getAddedColumnName().equals("")) {
+        if (!state.getAddedColumnName().isEmpty()) {
             ddlWriter.write(String.format("%s%n", " partition by range (" + state.getAddedColumnName() + ") interval (1)"));
             ddlWriter.write(String.format("%s%n", "(partition p000000001  values less than (2))"));
             ddlWriter.write(String.format("%s%n%n", "tablespace " + state.getTableSpace() + ";"));
@@ -104,7 +103,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
             for (Map.Entry<String, List<String>> entry : indexColumnsMap.entrySet()) {
                 String indexName = entry.getKey();
                 List<String> columnList = entry.getValue();
-                if (!state.getAddedColumnName().equals("")) { columnList.add(state.getAddedColumnName()); }
+                if (!state.getAddedColumnName().isEmpty()) { columnList.add(state.getAddedColumnName()); }
 
                 String sortedColumns = columnList.stream().sorted().collect(Collectors.joining(","));
                 if (uniqueColumnSets.contains(sortedColumns)) {
@@ -125,7 +124,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
                 ddlWriter.write(indexStr);
             }
 
-            if (!state.getAddedColumnName().equals("")) {
+            if (!state.getAddedColumnName().isEmpty()) {
                 String newIndexStr = String.format("CREATE INDEX %s.%s_IDX_%s ON %s.%s (\"%s\");%n",
                         state.getToSchema(), state.getAddedColumnName(), tableName, state.getToSchema(), tableFullName, state.getAddedColumnName());
                 writer.write(newIndexStr);
@@ -205,7 +204,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
                 break;
             // Add more data types as needed
             default:
-                sb.append("NOT FOUND/DEFAULT " + dataType);
+                sb.append("NOT FOUND/DEFAULT ").append(dataType);
                 break;
         }
 
@@ -214,5 +213,10 @@ public class AS400ToOracleHandler implements DatabaseHandler{
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public void extractTableMetadata(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
+
     }
 }
