@@ -100,17 +100,6 @@ public class MetaDataProcessor {
     }
 
     public DatabaseHandler getDatabaseHandler(int sourceDbType, int targetDbType) {
-        /*switch (state.getTableReadType()) {
-            case 0:
-                schema = extractMetadataFromWholeSchema(metaData, databaseHandler, state);
-                break;
-            case 1:
-                schema = extractMetadataFromTableList(metaData, databaseHandler, state);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unsupported database.");
-        }*/
-
         if ((sourceDbType == 5 || sourceDbType == 4) & targetDbType == 1) {
             return new AS400ToOracleHandler();
         }
