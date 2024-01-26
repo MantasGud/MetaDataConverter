@@ -47,7 +47,7 @@ public class MetaDataProcessor {
 
     private void CreateOriginalMetaDataFile(MetadataToolState state, List<TableMetaData> schema, FileWriter csvWriter) {
         try {
-            csvWriter.write("Table Name, Column Name, Data Type, Length, Scale, Not Null, Auto Increment\n");
+            csvWriter.write("Table Name, Column Name, Data Type, Length, Scale, Not Null, Auto Increment, Description\n");
             for (TableMetaData table : schema) {
                 for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
                     csvWriter.write(String.format("%s,%s,%s,%d,%d,%s,%s,%s,%n",
