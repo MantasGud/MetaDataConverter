@@ -16,4 +16,8 @@ public class TableMetaData {
     String tableName;
     Map<String, ColumnMetaData> columnList;
     Map<String, IndexMetaData> indexList;
+
+    public TableMetaData(String tableName) {
+        this.tableName = tableName;
+    }
 }
