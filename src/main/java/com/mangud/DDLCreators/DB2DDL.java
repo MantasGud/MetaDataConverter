@@ -1,6 +1,5 @@
 package com.mangud.DDLCreators;
 
-import com.mangud.Handlers.DatabaseHandler;
 import com.mangud.Metadata.TableMetaData;
 import com.mangud.States.MetadataToolState;
 
