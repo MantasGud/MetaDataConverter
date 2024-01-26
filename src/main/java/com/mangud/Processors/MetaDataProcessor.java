@@ -1,7 +1,7 @@
 package com.mangud.Processors;
 
-import com.mangud.Handlers.AS400ToOracleHandler;
-import com.mangud.Handlers.DatabaseHandler;
+import com.mangud.Enums.DatabaseType;
+import com.mangud.Handlers.*;
 import com.mangud.Metadata.TableMetaData;
 import com.mangud.States.MetadataToolState;
 
@@ -20,22 +20,102 @@ public class MetaDataProcessor {
             return;
         }
 
-        //List<TableMetaData> schema = extractMetaDataFromDatabase(state);
+        List<TableMetaData> schema = extractMetaDataFromDatabase(state);
+        if (schema.isEmpty()) {
+            System.err.println("Error - No table extracted.");
+            return;
+        }
         //createNewMetadataFiles(state, schema);
 
-        createMetaDataFiles(state);
+        //createMetaDataFiles(state);
     }
 
     private List<TableMetaData> extractMetaDataFromDatabase(MetadataToolState state) {
-        return null;
+        DatabaseHandler databaseHandler = getDatabaseHandler(state.getDbType());
+        List<TableMetaData> schema = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(state.getFullUrlWithLibraries(), state.getUsername(), state.getPassword())) {
+            DatabaseMetaData metaData = conn.getMetaData();
+
+            switch (state.getTableReadType()) {
+                case 0:
+                    schema = extractMetadataFromWholeSchema(metaData, databaseHandler, state);
+                    break;
+                case 1:
+                    schema = extractMetadataFromTableList(metaData, databaseHandler, state);
+                    break;
+                default:
+                    System.out.println("Invalid read choice. Please set correct read setting.");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to connect to database");
+            try {
+                InetAddress localAddress = InetAddress.getLocalHost();
+                System.err.println("Address - " + localAddress);
+            } catch (UnknownHostException f ) {
+                System.err.println("Unknown host exception - " + e.getMessage());
+            }
+            System.err.println("Url - " + state.getUrl());
+            e.printStackTrace();
+        }
+
+
+        return schema;
+    }
+
+    private List<TableMetaData> extractMetadataFromTableList(DatabaseMetaData metaData, DatabaseHandler databaseHandler, MetadataToolState state) {
+        List<TableMetaData> tableList = new ArrayList<>();
+        for (String tableName : state.getTableNames()) {
+            TableMetaData tableMetadata = databaseHandler.extractTableMetadata(metaData, tableName, state);
+            tableList.add(tableMetadata);
+        }
+        return tableList;
+    }
+
+    private List<TableMetaData> extractMetadataFromWholeSchema(DatabaseMetaData metaData, DatabaseHandler databaseHandler, MetadataToolState state) {
+        List<TableMetaData> tableList = new ArrayList<>();
+        try (ResultSet tableRs = metaData.getTables(null, state.getSchema(), null, new String[]{"TABLE"})) {
+            while (tableRs.next()) {
+                String tableName = tableRs.getString("TABLE_NAME");
+                TableMetaData tableMetadata = databaseHandler.extractTableMetadata(metaData, tableName, state);
+                tableList.add(tableMetadata);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tableList;
+    }
+
+    public DatabaseHandler getDatabaseHandler(DatabaseType databaseType) {
+        switch (databaseType) {
+            /*case ORACLE:
+                return new OracleHandler();*/
+            case AS400:
+                return new AS400Handler();
+            case DB2:
+                return new DB2Handler();
+            default:
+                throw new UnsupportedOperationException("Unsupported database.");
+        }
     }
 
     public DatabaseHandler getDatabaseHandler(int sourceDbType, int targetDbType) {
+        /*switch (state.getTableReadType()) {
+            case 0:
+                schema = extractMetadataFromWholeSchema(metaData, databaseHandler, state);
+                break;
+            case 1:
+                schema = extractMetadataFromTableList(metaData, databaseHandler, state);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported database.");
+        }*/
+
         if ((sourceDbType == 5 || sourceDbType == 4) & targetDbType == 1) {
             return new AS400ToOracleHandler();
         }
 
-        throw new UnsupportedOperationException("Unsupported database combination.");
+        throw new UnsupportedOperationException("Unsupported database.");
     }
 
     private void createMetaDataFiles(MetadataToolState state){
