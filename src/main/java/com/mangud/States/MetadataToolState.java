@@ -33,10 +33,10 @@ public class MetadataToolState implements Serializable {
 
     private boolean start = false;
 
-    private String toSchema;
-    private String addedColumnName;
-    private String tableStart;
-    private String tableSpace;
+    private String toSchema = "";
+    private String addedColumnName = "";
+    private String tableStart = "";
+    private String tableSpace = "";
 
     @Override
     public String toString() {
@@ -60,20 +60,20 @@ public class MetadataToolState implements Serializable {
     }
 
     public void setfullUrlWithLibraries() {
-        switch (dbType.getDbType()) {
-            case 1:
-                this.fullUrlWithLibraries = null;
+        switch (dbType) {
+            case ORACLE:
+                this.fullUrlWithLibraries = "jdbc:oracle:thin:@//" + this.url + "/" + this.schema;
                 break;
-            case 2:
-                this.fullUrlWithLibraries = null;
+            case MYSQL:
+                this.fullUrlWithLibraries = "jdbc:mysql://" + this.url + "/" + this.schema;
                 break;
-            case 3:
-                this.fullUrlWithLibraries = null;
+            case SQL:
+                this.fullUrlWithLibraries = "jdbc:sqlserver://" + this.url + ";databaseName=" + this.schema;
                 break;
-            case 4:
+            case DB2:
                 this.fullUrlWithLibraries = "jdbc:db2://" + this.url + "/" + this.schema;
                 break;
-            case 5:
+            case AS400:
                 this.fullUrlWithLibraries = "jdbc:as400://" + this.url + ";libraries=" + this.schema + ";";
                 break;
             default:
@@ -123,7 +123,6 @@ public class MetadataToolState implements Serializable {
 
     public boolean isValidInfo() {
         this.setfullUrlWithLibraries();
-        // Check if the required fields are not null
 
         if (isNullOrEmpty(schema)) {
             System.err.println("Invalid password.");
@@ -155,31 +154,30 @@ public class MetadataToolState implements Serializable {
             return false;
         }
 
-        // Validate database type
         if (dbType.getDbType() < 1 || dbType.getDbType() > 5) {
             System.err.println("Invalid database type.");
             return false;
         }
 
-        // Validate DLL database type
+
         if (dbDDLType.getDbType() < 1 || dbDDLType.getDbType() > 5) {
             System.err.println("Invalid DDL database type.");
             return false;
         }
 
-        // Validate tableReadType
+
         if (tableReadType < 0 || tableReadType > 1) {
             System.err.println("Invalid table read type.");
             return false;
         }
 
-        // Validate outputFile
+
         if (isNullOrEmpty(outputFile)) {
             System.err.println("Output file name cannot be null or empty.");
             return false;
         }
 
-        // Validate tableListFile and tableNames if tableReadType is 1
+
         if (tableReadType == 1) {
             if (isNullOrEmpty(tableListFile)) {
                 System.err.println("Table list file name cannot be null or empty when tableReadType is 1.");
