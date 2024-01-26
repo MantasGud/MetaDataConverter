@@ -1,7 +1,5 @@
 package com.mangud.DDLCreators;
 
-import com.mangud.Handlers.AS400Handler;
-import com.mangud.Handlers.DB2Handler;
 import com.mangud.Metadata.ColumnMetaData;
 import com.mangud.Metadata.IndexMetaData;
 import com.mangud.Metadata.TableMetaData;
@@ -24,7 +22,7 @@ public class OracleDDL implements DDLHandler{
             case AS400 -> FromAS400ToOracleDDL(state, schema, ddlWriter);
             case DB2 -> FromDB2ToOracleDDL(state, schema, ddlWriter);
             default -> throw new UnsupportedOperationException("Unsupported database.");
-        };
+        }
     }
 
     private void FromDB2ToOracleDDL(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
