@@ -1,15 +1,19 @@
 package com.mangud.Processors;
 
-import com.mangud.Enums.DatabaseType;
+import com.mangud.DDLCreators.DDLHandler;
 import com.mangud.Handlers.*;
+import com.mangud.Metadata.ColumnMetaData;
+import com.mangud.Metadata.IndexMetaData;
 import com.mangud.Metadata.TableMetaData;
 import com.mangud.States.MetadataToolState;
+import com.mangud.Utils.HandlerUtils;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MetaDataProcessor {
 
@@ -25,13 +29,53 @@ public class MetaDataProcessor {
             System.err.println("Error - No table extracted.");
             return;
         }
-        //createNewMetadataFiles(state, schema);
 
-        //createMetaDataFiles(state);
+        createMetaDatafiles(state, schema);
+    }
+
+    private void createMetaDatafiles(MetadataToolState state, List<TableMetaData> schema) {
+        DDLHandler ddlHandler = HandlerUtils.getDDLHandler(state.getDbDDLType());
+        try (FileWriter writer = new FileWriter(state.getOutputFile() + ".csv");
+             FileWriter ddlWriter = new FileWriter(state.getOutputFile() + "_ddl.sql")) {
+            CreateOriginalMetaDataFile(state, schema, writer);
+            ddlHandler.CreateDDLFile(state, schema, ddlWriter);
+        } catch (IOException e) {
+            System.err.println("Failed to write metadata to CSV file");
+            e.printStackTrace();
+        }
+    }
+
+    private void CreateOriginalMetaDataFile(MetadataToolState state, List<TableMetaData> schema, FileWriter csvWriter) {
+        try {
+            csvWriter.write("Table Name, Column Name, Data Type, Length, Scale, Not Null, Auto Increment\n");
+            for (TableMetaData table : schema) {
+                for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
+                    csvWriter.write(String.format("%s,%s,%s,%d,%d,%s,%s,%s,%n",
+                            table.getTableName(), column.getValue().getColumnName(), column.getValue().getDataType(), column.getValue().getLength(),
+                            column.getValue().getScale(),
+                            column.getValue().isNotNull() ? "Yes" : "No",
+                            column.getValue().isAutoIncrement() ? "Yes" : "No",
+                            column.getValue().getDescription()));
+                }
+                for (Map.Entry<String, IndexMetaData> index : table.getIndexList().entrySet()) {
+                    String indexType = index.getValue().isUnique() ? "CREATE UNIQUE INDEX" : "CREATE INDEX";
+                    String columns = index.getValue().getColumnList().stream().map(col -> "\"" + col + "\"").collect(Collectors.joining(", "));
+
+                    String indexStr = String.format("%s %s.%s ON %s.%s (%s);%n", indexType, state.getSchema(), index.getKey(), state.getSchema(), table.getTableName(), columns);
+
+                    csvWriter.write(indexStr);
+                }
+                csvWriter.write("\n");
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private List<TableMetaData> extractMetaDataFromDatabase(MetadataToolState state) {
-        DatabaseHandler databaseHandler = getDatabaseHandler(state.getDbType());
+        DatabaseHandler databaseHandler = HandlerUtils.getDatabaseHandler(state.getDbType());
         List<TableMetaData> schema = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(state.getFullUrlWithLibraries(), state.getUsername(), state.getPassword())) {
             DatabaseMetaData metaData = conn.getMetaData();
@@ -86,26 +130,7 @@ public class MetaDataProcessor {
         return tableList;
     }
 
-    public DatabaseHandler getDatabaseHandler(DatabaseType databaseType) {
-        switch (databaseType) {
-            /*case ORACLE:
-                return new OracleHandler();*/
-            case AS400:
-                return new AS400Handler();
-            case DB2:
-                return new DB2Handler();
-            default:
-                throw new UnsupportedOperationException("Unsupported database.");
-        }
-    }
 
-    public DatabaseHandler getDatabaseHandler(int sourceDbType, int targetDbType) {
-        if ((sourceDbType == 5 || sourceDbType == 4) & targetDbType == 1) {
-            return new AS400ToOracleHandler();
-        }
-
-        throw new UnsupportedOperationException("Unsupported database.");
-    }
 
     private void createMetaDataFiles(MetadataToolState state){
         try (Connection conn = DriverManager.getConnection(state.getFullUrlWithLibraries(), state.getUsername(), state.getPassword())) {
@@ -134,7 +159,7 @@ public class MetaDataProcessor {
     private void writeMetadataToFiles(DatabaseMetaData metaData, FileWriter writer, FileWriter ddlWriter, MetadataToolState state) throws SQLException, IOException {
         writer.write("Table Name, Column Name, Data Type, Length, Scale, Not Null, Auto Increment\n");
 
-        DatabaseHandler databaseHandler = getDatabaseHandler(state.getDbType().getDbType(), state.getDbDDLType().getDbType());
+        DatabaseHandler databaseHandler = HandlerUtils.getDatabaseHandler(state.getDbType().getDbType(), state.getDbDDLType().getDbType());
         switch (state.getTableReadType()) {
             case 0:
                 scanWholeSchema(metaData, writer, ddlWriter, databaseHandler, state);
