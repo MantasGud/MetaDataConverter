@@ -1,7 +1,6 @@
 package com.mangud.Processors;
 
 import com.mangud.DDLCreators.DDLHandler;
-import com.mangud.Enums.DatabaseType;
 import com.mangud.Handlers.*;
 import com.mangud.Metadata.ColumnMetaData;
 import com.mangud.Metadata.IndexMetaData;

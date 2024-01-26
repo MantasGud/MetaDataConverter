@@ -11,16 +11,13 @@ import com.mangud.Handlers.DatabaseHandler;
 public class HandlerUtils {
 
     public static DatabaseHandler getDatabaseHandler(DatabaseType databaseType) {
-        switch (databaseType) {
+        return switch (databaseType) {
             /*case ORACLE:
                 return new OracleHandler();*/
-            case AS400:
-                return new AS400Handler();
-            case DB2:
-                return new DB2Handler();
-            default:
-                throw new UnsupportedOperationException("Unsupported database.");
-        }
+            case AS400 -> new AS400Handler();
+            case DB2 -> new DB2Handler();
+            default -> throw new UnsupportedOperationException("Unsupported database.");
+        };
     }
 
     public static DatabaseHandler getDatabaseHandler(int sourceDbType, int targetDbType) {
@@ -32,16 +29,14 @@ public class HandlerUtils {
     }
 
     public static DDLHandler getDDLHandler(DatabaseType databaseType) {
-        switch (databaseType) {
-            case ORACLE:
-                return new OracleDDL();
+        return switch (databaseType) {
+            case ORACLE -> new OracleDDL();
             /*case AS400:
                 return new AS400Handler();
             case DB2:
                 return new DB2Handler();*/
-            default:
-                throw new UnsupportedOperationException("Unsupported database.");
-        }
+            default -> throw new UnsupportedOperationException("Unsupported database.");
+        };
 
     }
 
