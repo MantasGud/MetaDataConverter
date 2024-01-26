@@ -4,7 +4,6 @@ import com.mangud.Metadata.ColumnMetaData;
 import com.mangud.Metadata.IndexMetaData;
 import com.mangud.Metadata.TableMetaData;
 import com.mangud.States.MetadataToolState;
-import schemacrawler.schema.Index;
 
 import java.io.FileWriter;
 import java.io.IOException;
