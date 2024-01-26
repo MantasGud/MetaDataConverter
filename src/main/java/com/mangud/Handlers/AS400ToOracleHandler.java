@@ -1,6 +1,7 @@
 package com.mangud.Handlers;
 
 import com.mangud.Metadata.ColumnMetaData;
+import com.mangud.Metadata.TableMetaData;
 import com.mangud.States.MetadataToolState;
 
 import java.io.FileWriter;
@@ -216,7 +217,7 @@ public class AS400ToOracleHandler implements DatabaseHandler{
     }
 
     @Override
-    public void extractTableMetadata(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
-
+    public TableMetaData extractTableMetadata(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
+        return null;
     }
 }
