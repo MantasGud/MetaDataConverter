@@ -4,11 +4,11 @@ MetadataConverter is a Java command-line tool that extracts metadata
 from DB2/AS400 databases (at the moment) 
 and generates Oracle DDL and CSV files containing metadata and index information for the specified tables.
 
-### Full tool menu 
+### Functionality
 - Start process metadata to DDL/.csv file.
 - Test connection to server.
-- Insert created DDL file to database schema.(ORACLE)
-- Compare schema(Oracle) to schema(Oracle) and show diffs in file.
+- Insert created DDL file to database schema.(ORACLE right now)
+- Compare schema(Oracle) to schema(Oracle) and show diffs in file.(For Testing)
 
 ## Usage
 
@@ -30,19 +30,26 @@ Whole project connections can be configured when project is started. (Except par
 ## Building
 To build the project, use your favorite Java build tool, such as Maven or Gradle.
 
-# Future functionality
-### Extract Metadata from:
-- Oracle
-- MySQL
-- SQL
+# TODO Functionality
+### Extract Metadata
+- Oracle **Done**
+- MySQL **Done**
+- SQL **Done**
 - DB2 **Done**
 - AS400 **Done**
-### Create Metadata DDL to:
-- Oracle **Done**
-- MySQL
-- SQL
-- DB2
-- AS400
-### Compare any type database schema to any type database schema.
-### Select DDL file, extract tables, delete tables from schema and insert from DDL.
-### Extracted table as an object.
+### Create Metadata DDL to
+| From\To                       | Oracle | MySQL | SQL   | DB2   | AS400 |
+|----------------------------|--------|-------|-------|-------|-------|
+| - Oracle                    |**X**|     |       |       |       |
+| - MySQL                     |        |**X**|       |       |       |
+| - SQL                       |        |     |**X**|       |       |
+| - DB2                       | **Done** |     |       |**X**|       |
+| - AS400                     | **Done** |     |       |       |**X**|
+### Additional functionality 
+- Compare any type database schema to any type database schema.
+- Extracted table as an object. **Done**
+- Exract metadata information more than table columns and indexes.
+- Created CSV file to choosen DDL.
+- Created DDL file to choosen other DDL.
+- Insertion of DDL to database.(With deletion if needed)
+
