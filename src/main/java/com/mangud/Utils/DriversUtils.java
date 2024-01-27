@@ -6,10 +6,11 @@ import java.net.URLClassLoader;
 public class DriversUtils {
 
     public static void configureDriversClasspaths() throws ClassNotFoundException {
-        configureClasspath("jt400-11.1.jar", "com.ibm.as400.access.AS400JDBCDriver");
-        configureClasspath("db2jcc4-4.19.26.jar", "com.ibm.db2.jcc.DB2Driver");
-        configureClasspath("ojdbc6-11.2.0.4.jar", "oracle.jdbc.driver.OracleDriver");
-        configureClasspath("mssql-jdbc-12.2.0.jre11.jar", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        configureClasspath("mysql-connector-j-8.3.0.jar", "com.mysql.cj.jdbc.Driver");
+        configureClasspath("jt400-20.0.6.jar", "com.ibm.as400.access.AS400JDBCDriver");
+        configureClasspath("db2jcc4-4.33.31.jar", "com.ibm.db2.jcc.DB2Driver");
+        configureClasspath("ojdbc10-19.21.0.0.jar", "oracle.jdbc.driver.OracleDriver");
+        configureClasspath("mssql-jdbc-12.4.2.jre11.jar", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
     }
 
     private static void configureClasspath(String resourceLocation, String className)
