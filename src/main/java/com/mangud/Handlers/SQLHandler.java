@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class OracleHandler implements DatabaseHandler{
+public class SQLHandler implements DatabaseHandler{
     @Override
     public TableMetaData extractTableMetadata(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
         Map<String, ColumnMetaData> columnData = ExtractColumnsFromTable(metaData, tableName, state);
@@ -108,5 +108,4 @@ public class OracleHandler implements DatabaseHandler{
 
         return indexMap;
     }
-
 }
