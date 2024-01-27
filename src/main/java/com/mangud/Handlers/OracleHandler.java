@@ -3,10 +3,7 @@ package com.mangud.Handlers;
 import com.mangud.Metadata.TableMetaData;
 import com.mangud.States.MetadataToolState;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 
 public class OracleHandler implements DatabaseHandler{
     @Override
@@ -14,8 +11,4 @@ public class OracleHandler implements DatabaseHandler{
         return null;
     }
 
-    @Override
-    public void processTable(DatabaseMetaData metaData, String tableName, FileWriter writer, FileWriter ddlWriter, MetadataToolState state) throws SQLException, IOException {
-
-    }
 }

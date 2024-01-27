@@ -7,6 +7,7 @@ import com.mangud.States.MetadataToolState;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,94 +16,99 @@ public class OracleDDL implements DDLHandler{
 
     @Override
     public void CreateDDLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
+
+
         if (state.getDbDDLType().equals(state.getDbType())) throw new UnsupportedOperationException("Unsupported combination.");
 
         switch (state.getDbType()) {
             case MYSQL, SQL -> throw new UnsupportedOperationException("Not implemented yet.");
-            case AS400 -> FromAS400ToOracleDDL(state, schema, ddlWriter);
-            case DB2 -> FromDB2ToOracleDDL(state, schema, ddlWriter);
-            default -> throw new UnsupportedOperationException("Unsupported database.");
         }
+
+        CreateWholeDLLFile(state, schema, ddlWriter);
     }
 
-    private void FromDB2ToOracleDDL(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
+    private void CreateWholeDLLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
         try {
             for (TableMetaData table : schema) {
-                ddlWriter.write(String.format("CREATE TABLE \"" + state.getSchema() + "\".\"" + state.getTableStart() + "%s\" (%n", table.getTableName()));
-                for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
-                    String columnRow = getDDLRowFromDB2(column.getValue().getColumnName(), column.getValue().getDataType(), column.getValue().getLength(),
-                            column.getValue().getScale(), column.getValue().isNotNull());
-                    ddlWriter.write(String.format("%s,%n", columnRow));
-                }
-                if (!state.getAddedColumnName().isEmpty()) { ddlWriter.write(String.format("%s%n", "\"" + state.getAddedColumnName() + "\" NUMBER(22,0)")); }
-                ddlWriter.write(String.format("%s%n", ")"));
-                if (!state.getAddedColumnName().isEmpty() && !state.getTableSpace().isEmpty()) {
-                    ddlWriter.write(String.format("%s%n", " partition by range (" + state.getAddedColumnName() + ") interval (1)"));
-                    ddlWriter.write(String.format("%s%n", "(partition p000000001  values less than (2))"));
-                    ddlWriter.write(String.format("%s%n%n", "tablespace " + state.getTableSpace() + ";"));
-                }
+                writeCreateTableStatement(state, table, ddlWriter);
+                writeTableColumns(state, table, ddlWriter);
+                writeTablePartitionAndTableSpace(state, ddlWriter);
 
                 for (Map.Entry<String, IndexMetaData> index : table.getIndexList().entrySet()) {
-                    String indexType = index.getValue().isUnique() ? "CREATE UNIQUE INDEX" : "CREATE INDEX";
-                    String columns = index.getValue().getColumnList().stream().map(col -> "\"" + col + "\"").collect(Collectors.joining(", "));
-
-                    String indexStr = String.format("%s %s.%s ON %s.%s (%s);%n", indexType, state.getSchema(), index.getKey(), state.getSchema(), state.getTableStart() + table.getTableName(), columns);
-
-                    ddlWriter.write(indexStr);
+                    writeIndexStatement(index, ddlWriter, state, table);
                 }
 
-                if (!state.getAddedColumnName().isEmpty()) {
-                    String newIndexStr = String.format("CREATE INDEX %s.%s_IDX_%s ON %s.%s (\"%s\");%n",
-                            state.getSchema(), state.getAddedColumnName(), table.getTableName(), state.getToSchema(), state.getTableStart() + table.getTableName(), state.getAddedColumnName());
-                    ddlWriter.write(newIndexStr);
-                }
+                writeAddedColumnIndex(state, table, ddlWriter);
                 ddlWriter.write("\n");
 
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
-    private void FromAS400ToOracleDDL(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
-        try {
-            for (TableMetaData table : schema) {
-                ddlWriter.write(String.format("CREATE TABLE \"" + state.getSchema() + "\".\"" + state.getTableStart() + "%s\" (%n", table.getTableName()));
-                for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
-                    String columnRow = getDDLRowFromAS400(column.getValue().getColumnName(), column.getValue().getDataType(), column.getValue().getLength(),
-                            column.getValue().getScale(), column.getValue().isNotNull());
-                    ddlWriter.write(String.format("%s,%n", columnRow));
-                }
-                if (!state.getAddedColumnName().isEmpty()) { ddlWriter.write(String.format("%s%n", "\"" + state.getAddedColumnName() + "\" NUMBER(22,0)")); }
-                ddlWriter.write(String.format("%s%n", ")"));
-                if (!state.getAddedColumnName().isEmpty() && !state.getTableSpace().isEmpty()) {
-                    ddlWriter.write(String.format("%s%n", " partition by range (" + state.getAddedColumnName() + ") interval (1)"));
-                    ddlWriter.write(String.format("%s%n", "(partition p000000001  values less than (2))"));
-                    ddlWriter.write(String.format("%s%n%n", "tablespace " + state.getTableSpace() + ";"));
-                }
-
-                for (Map.Entry<String, IndexMetaData> index : table.getIndexList().entrySet()) {
-                    String indexType = index.getValue().isUnique() ? "CREATE UNIQUE INDEX" : "CREATE INDEX";
-                    String columns = index.getValue().getColumnList().stream().map(col -> "\"" + col + "\"").collect(Collectors.joining(", "));
-
-                    String indexStr = String.format("%s %s.%s ON %s.%s (%s);%n", indexType, state.getSchema(), index.getKey(), state.getSchema(), state.getTableStart() + table.getTableName(), columns);
-
-                    ddlWriter.write(indexStr);
-                }
-
-                if (!state.getAddedColumnName().isEmpty()) {
-                    String newIndexStr = String.format("CREATE INDEX %s.%s_IDX_%s ON %s.%s (\"%s\");%n",
-                            state.getSchema(), state.getAddedColumnName(), table.getTableName(), state.getToSchema(), state.getTableStart() + table.getTableName(), state.getAddedColumnName());
-                    ddlWriter.write(newIndexStr);
-                }
-                ddlWriter.write("\n");
-
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private void writeAddedColumnIndex(MetadataToolState state, TableMetaData table, FileWriter ddlWriter) throws IOException {
+        if (!state.getAddedColumnName().isEmpty()) {
+            String newIndexStr = String.format("CREATE INDEX %s.%s_IDX_%s ON %s.%s (\"%s\");%n",
+                    state.getSchema(), state.getAddedColumnName(), table.getTableName(),
+                    state.getSchema(), state.getTableStart() + table.getTableName(), state.getAddedColumnName());
+            ddlWriter.write(newIndexStr);
         }
+    }
+
+    private void writeIndexStatement(Map.Entry<String, IndexMetaData> index, Writer ddlWriter, MetadataToolState state, TableMetaData table) throws IOException {
+        String indexType = index.getValue().isUnique() ? "CREATE UNIQUE INDEX" : "CREATE INDEX";
+        String columns = index.getValue().getColumnList().stream().map(col -> "\"" + col + "\"").collect(Collectors.joining(", "));
+
+        String indexStr = String.format("%s %s.%s ON %s.%s (%s);%n", indexType, state.getSchema(), index.getKey(),
+                state.getSchema(), state.getTableStart() + table.getTableName(), columns);
+
+        ddlWriter.write(indexStr);
+    }
+
+    private void writeTablePartitionAndTableSpace(MetadataToolState state, Writer ddlWriter) throws IOException {
+        if (!state.getAddedColumnName().isEmpty() && !state.getTableSpace().isEmpty()) {
+            ddlWriter.write(String.format(" PARTITION BY RANGE (\"%s\") INTERVAL (1)%n", state.getAddedColumnName()));
+            ddlWriter.write(String.format("(PARTITION p000000001 VALUES LESS THAN (2))%n"));
+            ddlWriter.write(String.format(" TABLESPACE %s;%n%n", state.getTableSpace()));
+        }
+    }
+
+    private void writeCreateTableStatement(MetadataToolState state, TableMetaData table, FileWriter ddlWriter) throws IOException {
+        ddlWriter.write(String.format("CREATE TABLE \"%s\".\"%s%s\" (%n", state.getSchema(), state.getTableStart(), table.getTableName()));
+    }
+
+    private void writeTableColumns(MetadataToolState state, TableMetaData table, Writer ddlWriter) throws IOException {
+        int totalColumns = table.getColumnList().size();
+        int currentColumnIndex = 0;
+
+        for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
+            String columnRow = "";
+            switch (state.getDbType()) {
+                case MYSQL, SQL -> throw new UnsupportedOperationException("Not implemented yet.");
+                case AS400 -> columnRow = getDDLRowFromAS400(column.getValue().getColumnName(), column.getValue().getDataType(), column.getValue().getLength(),
+                        column.getValue().getScale(), column.getValue().isNotNull());
+                case DB2 -> columnRow = getDDLRowFromDB2(column.getValue().getColumnName(), column.getValue().getDataType(), column.getValue().getLength(),
+                        column.getValue().getScale(), column.getValue().isNotNull());
+                default -> throw new UnsupportedOperationException("Unsupported database.");
+            }
+
+            if (++currentColumnIndex == totalColumns) {
+                writeLastColumnStatement(state, columnRow, ddlWriter);
+            } else {
+                ddlWriter.write(String.format("%s,%n", columnRow));
+            }
+        }
+    }
+
+    private void writeLastColumnStatement(MetadataToolState state, String columnRow, Writer ddlWriter) throws IOException {
+        if (!state.getAddedColumnName().isEmpty()) {
+            ddlWriter.write(String.format("%s,%n", columnRow));
+            ddlWriter.write(String.format("\"%s\" NUMBER(22,0)%n", state.getAddedColumnName()));
+        } else {
+            ddlWriter.write(String.format("%s%n", columnRow));
+        }
+        ddlWriter.write(");\n");
     }
 
     private static String getDDLRowFromDB2(String columnName, String dataType, int length, int scale, boolean notNull) {
