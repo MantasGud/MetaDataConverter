@@ -29,7 +29,7 @@ public class OracleHandler implements DatabaseHandler{
                         columnRs.getInt("COLUMN_SIZE"),
                         columnRs.getInt("DECIMAL_DIGITS"),
                         columnRs.getInt("NULLABLE") == DatabaseMetaData.columnNoNulls,
-                        columnRs.getBoolean("IS_AUTOINCREMENT"),
+                        false,
                         columnRs.getString("REMARKS")
                 );
                 columnMap.put(columnRs.getString("COLUMN_NAME"), columnMetadata);
