@@ -62,7 +62,8 @@ public class MetadataToolState implements Serializable {
     public void setfullUrlWithLibraries() {
         switch (dbType) {
             case ORACLE:
-                this.fullUrlWithLibraries = "jdbc:oracle:thin:@//" + this.url + "/" + this.schema;
+                String[] parts = url.split(":");
+                this.fullUrlWithLibraries = "jdbc:oracle:thin:@//" + this.url + "/" + parts[0];
                 break;
             case MYSQL:
                 this.fullUrlWithLibraries = "jdbc:mysql://" + this.url + "/" + this.schema;
