@@ -233,6 +233,8 @@ public class OracleDDL implements DDLHandler{
                 sb.append("BINARY_FLOAT");
                 break;
             case "DATE":
+                sb.append("DATE");
+                break;
             case "TIMESTAMP":
                 sb.append("TIMESTAMP (9)");
                 break;
@@ -386,6 +388,8 @@ public class OracleDDL implements DDLHandler{
                 sb.append("BINARY_FLOAT");
                 break;
             case "DATE":
+                sb.append("DATE");
+                break;
             case "TIMESTAMP":
                 sb.append("TIMESTAMP (9)");
                 break;
