@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface DDLHandler {
 
-    void CreateDDLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter);
+    void createDDLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter);
 
 }
