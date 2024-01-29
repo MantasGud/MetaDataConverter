@@ -126,6 +126,9 @@ public class DB2DDL implements DDLHandler {
             case "DATE":
                 sb.append("DATE");
                 break;
+            case "TIMESTAMP(9)":
+                sb.append("TIMESTAMP");
+                break;
             case "TIMESTAMP":
                 sb.append("TIMESTAMP");
                 break;

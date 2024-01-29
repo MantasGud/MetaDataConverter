@@ -154,7 +154,7 @@ public class OracleDDL implements DDLHandler{
                 break;
             case "DATETIME":
             case "SMALLDATETIME":
-                sb.append("TIMESTAMP");
+                sb.append("TIMESTAMP (9)");
                 break;
             case "DATE":
                 sb.append("DATE");
@@ -233,8 +233,10 @@ public class OracleDDL implements DDLHandler{
                 sb.append("BINARY_FLOAT");
                 break;
             case "DATE":
-            case "TIMESTAMP":
                 sb.append("DATE");
+                break;
+            case "TIMESTAMP":
+                sb.append("TIMESTAMP (9)");
                 break;
             case "TIME":
                 sb.append("INTERVAL DAY(0) TO SECOND");
@@ -310,7 +312,7 @@ public class OracleDDL implements DDLHandler{
                 break;
             case "DATETIME":
             case "TIMESTAMP":
-                sb.append("TIMESTAMP");
+                sb.append("TIMESTAMP (9)");
                 break;
             case "YEAR":
                 sb.append("NUMBER(4)");
@@ -386,8 +388,10 @@ public class OracleDDL implements DDLHandler{
                 sb.append("BINARY_FLOAT");
                 break;
             case "DATE":
-            case "TIMESTAMP":
                 sb.append("DATE");
+                break;
+            case "TIMESTAMP":
+                sb.append("TIMESTAMP (9)");
                 break;
             case "TIME":
                 sb.append("INTERVAL DAY(0) TO SECOND");
