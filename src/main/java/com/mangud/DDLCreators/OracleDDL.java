@@ -15,19 +15,15 @@ import java.util.stream.Collectors;
 public class OracleDDL implements DDLHandler{
 
     @Override
-    public void CreateDDLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
+    public void createDDLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
 
 
         if (state.getDbDDLType().equals(state.getDbType())) throw new UnsupportedOperationException("Unsupported combination.");
 
-        switch (state.getDbType()) {
-            case MYSQL, SQL -> throw new UnsupportedOperationException("Not implemented yet.");
-        }
-
-        CreateWholeDLLFile(state, schema, ddlWriter);
+        createDLLFile(state, schema, ddlWriter);
     }
 
-    private void CreateWholeDLLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
+    private void createDLLFile(MetadataToolState state, List<TableMetaData> schema, FileWriter ddlWriter) {
         try {
             for (TableMetaData table : schema) {
                 writeCreateTableStatement(state, table, ddlWriter);
@@ -83,13 +79,12 @@ public class OracleDDL implements DDLHandler{
         int currentColumnIndex = 0;
 
         for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
-            String columnRow = "";
+            String columnRow;
             switch (state.getDbType()) {
-                case MYSQL, SQL -> throw new UnsupportedOperationException("Not implemented yet.");
-                case AS400 -> columnRow = getDDLRowFromAS400(column.getValue().getColumnName(), column.getValue().getDataType(), column.getValue().getLength(),
-                        column.getValue().getScale(), column.getValue().isNotNull());
-                case DB2 -> columnRow = getDDLRowFromDB2(column.getValue().getColumnName(), column.getValue().getDataType(), column.getValue().getLength(),
-                        column.getValue().getScale(), column.getValue().isNotNull());
+                case MYSQL -> columnRow = getDDLRowFromMySQL(column.getValue());
+                case SQL -> columnRow = getDDLRowFromSQL(column.getValue());
+                case AS400 -> columnRow = getDDLRowFromAS400(column.getValue());
+                case DB2 -> columnRow = getDDLRowFromDB2(column.getValue());
                 default -> throw new UnsupportedOperationException("Unsupported database.");
             }
 
@@ -111,18 +106,14 @@ public class OracleDDL implements DDLHandler{
         ddlWriter.write(");\n");
     }
 
-    private static String getDDLRowFromDB2(String columnName, String dataType, int length, int scale, boolean notNull) {
+    private static String getDDLRowFromSQL(ColumnMetaData column) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append('\"').append(columnName).append('\"').append(' ');
+        sb.append('\"').append(column.getColumnName()).append('\"').append(' ');
 
-        switch (dataType) {
-            case "DECIMAL":
-            case "NUMERIC":
-                sb.append("NUMBER(").append(length).append(",").append(scale).append(")");
-                break;
-            case "INTEGER":
-                sb.append("NUMBER");
+        switch (column.getDataType().toUpperCase()) {
+            case "INT":
+                sb.append("NUMBER(10)");
                 break;
             case "SMALLINT":
                 sb.append("NUMBER(5)");
@@ -131,74 +122,75 @@ public class OracleDDL implements DDLHandler{
                 sb.append("NUMBER(19)");
                 break;
             case "VARCHAR":
-                sb.append("VARCHAR2(").append(length).append(")");
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
+                break;
+            case "NVARCHAR":
+                sb.append("NVARCHAR2(").append(column.getLength()).append(")");
                 break;
             case "CHAR":
-                sb.append("VARCHAR2(").append(length).append(")");
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
                 break;
-            case "GRAPHIC":
-                sb.append("NVARCHAR2(").append(length).append(")");
+            case "NCHAR":
+                sb.append("NVARCHAR2(").append(column.getLength()).append(")");
                 break;
             case "BINARY":
-                sb.append("RAW(").append(length).append(")");
-                break;
             case "VARBINARY":
-                sb.append("RAW(").append(length).append(")");
+                sb.append("RAW(").append(column.getLength()).append(")");
                 break;
-            case "CHAR () FOR BIT DATA":
-            case "VARCHAR () FOR BIT DATA":
-                sb.append("RAW(").append(length).append(")");
+            case "BIT":
+                sb.append("NUMBER(1)");
                 break;
-            case "CLOB":
-                sb.append("CLOB");
+            case "DECIMAL":
+                sb.append("NUMBER(").append(column.getLength()).append(",").append(column.getScale()).append(")");
                 break;
-            case "BLOB":
-                sb.append("BLOB");
+            case "NUMERIC":
+                sb.append("NUMBER(").append(column.getLength()).append(",").append(column.getScale()).append(")");
                 break;
-            case "ROWID":
-                sb.append("UROWID");
-                break;
-            case "REAL":
+            case "FLOAT":
                 sb.append("BINARY_FLOAT");
                 break;
-            case "DATE":
-            case "TIMESTAMP":
-                sb.append("DATE");
-                break;
-            case "TIME":
-                sb.append("INTERVAL DAY(0) TO SECOND");
-                break;
-            case "TIMESTAMP WITH TIME ZONE":
-                sb.append("TIMESTAMP WITH TIME ZONE");
-                break;
-            case "DOUBLE":
+            case "REAL":
                 sb.append("BINARY_DOUBLE");
                 break;
+            case "DATETIME":
+            case "SMALLDATETIME":
+                sb.append("TIMESTAMP (9)");
+                break;
+            case "DATE":
+                sb.append("DATE");
+                break;
+            case "TEXT":
+                sb.append("CLOB");
+                break;
+            case "NTEXT":
             case "XML":
-                sb.append("XMLTYPE");
+                sb.append("NCLOB");
+                break;
+            case "IMAGE":
+                sb.append("BLOB");
                 break;
             // Add more data types as needed
             default:
-                sb.append("NOT FOUND/DEFAULT ").append(dataType);
+                sb.append("NOT FOUND/DEFAULT ").append(column.getDataType());
                 break;
         }
 
-        if (notNull) {
+        if (column.isNotNull()) {
             sb.append(" NOT NULL");
         }
 
         return sb.toString();
     }
 
-    private static String getDDLRowFromAS400(String columnName, String dataType, int length, int scale, boolean notNull) {
+    private static String getDDLRowFromDB2(ColumnMetaData column) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append('\"').append(columnName).append('\"').append(' ');
+        sb.append('\"').append(column.getColumnName()).append('\"').append(' ');
 
-        switch (dataType) {
+        switch (column.getDataType().toUpperCase()) {
             case "DECIMAL":
             case "NUMERIC":
-                sb.append("NUMBER(").append(length).append(",").append(scale).append(")");
+                sb.append("NUMBER(").append(column.getLength()).append(",").append(column.getScale()).append(")");
                 break;
             case "INTEGER":
                 sb.append("NUMBER");
@@ -210,23 +202,23 @@ public class OracleDDL implements DDLHandler{
                 sb.append("NUMBER(19)");
                 break;
             case "VARCHAR":
-                sb.append("VARCHAR2(").append(length).append(")");
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
                 break;
             case "CHAR":
-                sb.append("VARCHAR2(").append(length).append(")");
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
                 break;
             case "GRAPHIC":
-                sb.append("NVARCHAR2(").append(length).append(")");
+                sb.append("NVARCHAR2(").append(column.getLength()).append(")");
                 break;
             case "BINARY":
-                sb.append("RAW(").append(length).append(")");
+                sb.append("RAW(").append(column.getLength()).append(")");
                 break;
             case "VARBINARY":
-                sb.append("RAW(").append(length).append(")");
+                sb.append("RAW(").append(column.getLength()).append(")");
                 break;
             case "CHAR () FOR BIT DATA":
             case "VARCHAR () FOR BIT DATA":
-                sb.append("RAW(").append(length).append(")");
+                sb.append("RAW(").append(column.getLength()).append(")");
                 break;
             case "CLOB":
                 sb.append("CLOB");
@@ -241,8 +233,10 @@ public class OracleDDL implements DDLHandler{
                 sb.append("BINARY_FLOAT");
                 break;
             case "DATE":
-            case "TIMESTAMP":
                 sb.append("DATE");
+                break;
+            case "TIMESTAMP":
+                sb.append("TIMESTAMP (9)");
                 break;
             case "TIME":
                 sb.append("INTERVAL DAY(0) TO SECOND");
@@ -258,11 +252,166 @@ public class OracleDDL implements DDLHandler{
                 break;
             // Add more data types as needed
             default:
-                sb.append("NOT FOUND/DEFAULT ").append(dataType);
+                sb.append("NOT FOUND/DEFAULT ").append(column.getDataType());
                 break;
         }
 
-        if (notNull) {
+        if (column.isNotNull()) {
+            sb.append(" NOT NULL");
+        }
+
+        return sb.toString();
+    }
+
+    private static String getDDLRowFromMySQL(ColumnMetaData column) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append('\"').append(column.getColumnName()).append('\"').append(' ');
+
+        switch (column.getDataType().toUpperCase()) {
+            case "INT":
+            case "MEDIUMINT":
+            case "SMALLINT":
+            case "TINYINT":
+                sb.append("NUMBER(10)");
+                break;
+            case "BIGINT":
+                sb.append("NUMBER(19)");
+                break;
+            case "VARCHAR":
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
+                break;
+            case "CHAR":
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
+                break;
+            case "DECIMAL":
+            case "NUMERIC":
+                sb.append("NUMBER(").append(column.getLength()).append(",").append(column.getScale()).append(")");
+                break;
+            case "BINARY":
+            case "VARBINARY":
+                sb.append("RAW(").append(column.getLength()).append(")");
+                break;
+            case "BLOB":
+            case "TINYBLOB":
+            case "MEDIUMBLOB":
+            case "LONGBLOB":
+                sb.append("BLOB");
+                break;
+            case "TEXT":
+            case "TINYTEXT":
+            case "MEDIUMTEXT":
+            case "LONGTEXT":
+                sb.append("CLOB");
+                break;
+            case "DATE":
+                sb.append("DATE");
+                break;
+            case "TIME":
+                sb.append("INTERVAL DAY(0) TO SECOND");
+                break;
+            case "DATETIME":
+            case "TIMESTAMP":
+                sb.append("TIMESTAMP (9)");
+                break;
+            case "YEAR":
+                sb.append("NUMBER(4)");
+                break;
+            case "FLOAT":
+                sb.append("BINARY_FLOAT");
+                break;
+            case "DOUBLE":
+                sb.append("BINARY_DOUBLE");
+                break;
+            // Add more data types as needed
+            default:
+                sb.append("NOT FOUND/DEFAULT ").append(column.getDataType());
+                break;
+        }
+
+        if (column.isNotNull()) {
+            sb.append(" NOT NULL");
+        }
+
+        return sb.toString();
+    }
+
+
+    private static String getDDLRowFromAS400(ColumnMetaData column) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append('\"').append(column.getColumnName()).append('\"').append(' ');
+
+        switch (column.getDataType().toUpperCase()) {
+            case "DECIMAL":
+            case "NUMERIC":
+                sb.append("NUMBER(").append(column.getLength()).append(",").append(column.getScale()).append(")");
+                break;
+            case "INTEGER":
+                sb.append("NUMBER");
+                break;
+            case "SMALLINT":
+                sb.append("NUMBER(5)");
+                break;
+            case "BIGINT":
+                sb.append("NUMBER(19)");
+                break;
+            case "VARCHAR":
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
+                break;
+            case "CHAR":
+                sb.append("VARCHAR2(").append(column.getLength()).append(")");
+                break;
+            case "GRAPHIC":
+                sb.append("NVARCHAR2(").append(column.getLength()).append(")");
+                break;
+            case "BINARY":
+                sb.append("RAW(").append(column.getLength()).append(")");
+                break;
+            case "VARBINARY":
+                sb.append("RAW(").append(column.getLength()).append(")");
+                break;
+            case "CHAR () FOR BIT DATA":
+            case "VARCHAR () FOR BIT DATA":
+                sb.append("RAW(").append(column.getLength()).append(")");
+                break;
+            case "CLOB":
+                sb.append("CLOB");
+                break;
+            case "BLOB":
+                sb.append("BLOB");
+                break;
+            case "ROWID":
+                sb.append("UROWID");
+                break;
+            case "REAL":
+                sb.append("BINARY_FLOAT");
+                break;
+            case "DATE":
+                sb.append("DATE");
+                break;
+            case "TIMESTAMP":
+                sb.append("TIMESTAMP (9)");
+                break;
+            case "TIME":
+                sb.append("INTERVAL DAY(0) TO SECOND");
+                break;
+            case "TIMESTAMP WITH TIME ZONE":
+                sb.append("TIMESTAMP WITH TIME ZONE");
+                break;
+            case "DOUBLE":
+                sb.append("BINARY_DOUBLE");
+                break;
+            case "XML":
+                sb.append("XMLTYPE");
+                break;
+            // Add more data types as needed
+            default:
+                sb.append("NOT FOUND/DEFAULT ").append(column.getDataType());
+                break;
+        }
+
+        if (column.isNotNull()) {
             sb.append(" NOT NULL");
         }
 
