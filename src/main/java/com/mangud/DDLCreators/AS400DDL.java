@@ -52,7 +52,7 @@ public class AS400DDL implements DDLHandler{
         int currentColumnIndex = 0;
 
         for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
-            String columnRow = "";
+            String columnRow;
             switch (state.getDbType()) {
                 case ORACLE -> columnRow = getDDLRowFromOracle(column.getValue());
                 default -> throw new UnsupportedOperationException("Unsupported database.");

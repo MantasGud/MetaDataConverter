@@ -79,7 +79,7 @@ public class OracleDDL implements DDLHandler{
         int currentColumnIndex = 0;
 
         for (Map.Entry<String, ColumnMetaData> column : table.getColumnList().entrySet()) {
-            String columnRow = "";
+            String columnRow;
             switch (state.getDbType()) {
                 case MYSQL -> columnRow = getDDLRowFromMySQL(column.getValue());
                 case SQL -> columnRow = getDDLRowFromSQL(column.getValue());

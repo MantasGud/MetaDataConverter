@@ -26,7 +26,6 @@ public class HandlerUtils {
             case SQL -> throw new UnsupportedOperationException("Not implemented yet");
             case DB2 -> new DB2DDL();
             case AS400 -> new AS400DDL();
-            default -> throw new UnsupportedOperationException("Unsupported database.");
         };
 
     }
