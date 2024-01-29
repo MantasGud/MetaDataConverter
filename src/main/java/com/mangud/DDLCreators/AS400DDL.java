@@ -66,6 +66,7 @@ public class AS400DDL implements DDLHandler{
         }
     }
 
+    //TIMEStAMP I TIMESTAMP . ORACLE - TIMEStAMP (9), db2 TIMESTAMP
     private void writeLastColumnStatement(MetadataToolState state, String columnRow, FileWriter ddlWriter) throws IOException {
         if (!state.getAddedColumnName().isEmpty()) {
             ddlWriter.write(String.format("%s,%n", columnRow));
@@ -119,6 +120,9 @@ public class AS400DDL implements DDLHandler{
                 break;
             case "DATE":
                 sb.append("DATE");
+                break;
+            case "TIMESTAMP(9)":
+                sb.append("TIMESTAMP");
                 break;
             case "TIMESTAMP":
                 sb.append("TIMESTAMP");
