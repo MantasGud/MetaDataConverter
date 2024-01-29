@@ -37,15 +37,15 @@ public class MetaDataProcessor {
         DDLHandler ddlHandler = HandlerUtils.getDDLHandler(state.getDbDDLType());
         try (FileWriter writer = new FileWriter(state.getOutputFile() + ".csv");
              FileWriter ddlWriter = new FileWriter(state.getOutputFile() + "_ddl.sql")) {
-            CreateOriginalMetaDataFile(state, schema, writer);
-            ddlHandler.CreateDDLFile(state, schema, ddlWriter);
+            createOriginalMetaDataFile(state, schema, writer);
+            ddlHandler.createDDLFile(state, schema, ddlWriter);
         } catch (IOException e) {
             System.err.println("Failed to write metadata to CSV file");
             e.printStackTrace();
         }
     }
 
-    private void CreateOriginalMetaDataFile(MetadataToolState state, List<TableMetaData> schema, FileWriter csvWriter) {
+    private void createOriginalMetaDataFile(MetadataToolState state, List<TableMetaData> schema, FileWriter csvWriter) {
         try {
             csvWriter.write("Table Name, Column Name, Data Type, Length, Scale, Not Null, Auto Increment, Description\n");
             for (TableMetaData table : schema) {

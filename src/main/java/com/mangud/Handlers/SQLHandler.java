@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 public class SQLHandler implements DatabaseHandler{
     @Override
     public TableMetaData extractTableMetadata(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
-        Map<String, ColumnMetaData> columnData = ExtractColumnsFromTable(metaData, tableName, state);
-        Map<String, IndexMetaData> indexData = ExtractIndexFromTable(metaData, tableName, state);
+        Map<String, ColumnMetaData> columnData = extractColumnsFromTable(metaData, tableName, state);
+        Map<String, IndexMetaData> indexData = extractIndexFromTable(metaData, tableName, state);
         return new TableMetaData(tableName, columnData, indexData);
     }
 
-    private Map<String, ColumnMetaData> ExtractColumnsFromTable(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
+    private Map<String, ColumnMetaData> extractColumnsFromTable(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
         Map<String, ColumnMetaData> columnMap = new LinkedHashMap<>();
         try (ResultSet columnRs = metaData.getColumns(null, state.getSchema(), tableName, null)) {
             while (columnRs.next()) {
@@ -40,7 +40,7 @@ public class SQLHandler implements DatabaseHandler{
         return columnMap;
     }
 
-    private Map<String, IndexMetaData> ExtractIndexFromTable(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
+    private Map<String, IndexMetaData> extractIndexFromTable(DatabaseMetaData metaData, String tableName, MetadataToolState state) {
         Map<String, IndexMetaData> indexMap = new LinkedHashMap<>();
         try (ResultSet indexRs = metaData.getIndexInfo(null, state.getSchema(), tableName, false, false)) {
             Map<String, List<String>> indexColumnsMap = new HashMap<>();
