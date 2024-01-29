@@ -40,9 +40,9 @@ To build the project, use your favorite Java build tool, such as Maven or Gradle
 ### Create Metadata DDL to
 | From\To                       | Oracle | MySQL | SQL   | DB2   | AS400 |
 |----------------------------|--------|-------|-------|-------|-------|
-| - Oracle                    |**X**|     |       |       |       |
-| - MySQL                     |        |**X**|       |       |       |
-| - SQL                       |        |     |**X**|       |       |
+| - Oracle                    |**X**|     |       | **Done** | **Done** |
+| - MySQL                     | **Done** |**X**|       |       |       |
+| - SQL                       | **Done** |     |**X**|       |       |
 | - DB2                       | **Done** |     |       |**X**|       |
 | - AS400                     | **Done** |     |       |       |**X**|
 ### Additional functionality 
