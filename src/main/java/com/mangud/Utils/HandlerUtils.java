@@ -6,7 +6,11 @@ import com.mangud.DDLCreators.DDLHandler;
 import com.mangud.DDLCreators.OracleDDL;
 import com.mangud.Enums.DatabaseType;
 import com.mangud.Handlers.*;
+import lombok.experimental.UtilityClass;
 
+import static com.mangud.constants.ErrorsConstants.*;
+
+@UtilityClass
 public class HandlerUtils {
 
     public static DatabaseHandler getDatabaseHandler(DatabaseType databaseType) {
@@ -22,8 +26,8 @@ public class HandlerUtils {
     public static DDLHandler getDDLHandler(DatabaseType databaseType) {
         return switch (databaseType) {
             case ORACLE -> new OracleDDL();
-            case MYSQL -> throw new UnsupportedOperationException("Not implemented yet.");
-            case SQL -> throw new UnsupportedOperationException("Not implemented yet");
+            case MYSQL -> throw new UnsupportedOperationException(NOT_IMPLEMENTED);
+            case SQL -> throw new UnsupportedOperationException(NOT_IMPLEMENTED);
             case DB2 -> new DB2DDL();
             case AS400 -> new AS400DDL();
         };
