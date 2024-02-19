@@ -1,5 +1,7 @@
 package com.mangud.Utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+@UtilityClass
 public class DatabaseUtils {
 
     public static void executeSqlFile(Connection conn, String sqlFilePath) throws IOException, SQLException {
