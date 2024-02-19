@@ -17,16 +17,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DriversUtilsTest {
     private static final String DRIVERS_LOCATION = "";
 
-    private String[] resourceLocations = {
+    private final String[] resourceLocations = {
             DRIVERS_LOCATION + MYSQL_DRIVER_JAR,
             DRIVERS_LOCATION + AS400_DRIVER_JAR,
             DRIVERS_LOCATION + DB2_DRIVER_JAR,
             DRIVERS_LOCATION + ORACLE_DRIVER_JAR,
             DRIVERS_LOCATION + SQL_DRIVER_JAR
     };
-
-    @Mock
-    private URLClassLoader mockUrlClassLoader;
 
     @Test
     public void testResourceAvailability() {
@@ -38,7 +35,7 @@ public class DriversUtilsTest {
     @Test
     public void testInvalidClassName() {
         assertThrows(ClassNotFoundException.class,
-                ()->{configureClasspath(DRIVERS_LOCATION + MYSQL_DRIVER_JAR, "org.aaa.aaa");} );
+                ()-> configureClasspath(DRIVERS_LOCATION + MYSQL_DRIVER_JAR, "org.aaa.aaa"));
     }
 
     @Test
