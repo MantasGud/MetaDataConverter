@@ -1,10 +1,13 @@
 package com.mangud.Utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+@UtilityClass
 public class IOUtils {
 
     public static void writeToFile(List<String> diffSql, String outputFilePath) throws IOException {
